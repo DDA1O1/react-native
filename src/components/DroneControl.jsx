@@ -1,23 +1,73 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Pressable, Animated } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { useDispatch, useSelector } from 'react-redux';
+import { setConnectionStatus, setStreamEnabled } from '@store/slices/droneSlice';
+import { savePhoto, saveVideo } from '../utils/storage';
 
 const DroneControl = ({ 
-  isConnected, 
-  onConnect, 
-  streamEnabled, 
-  onCapturePhoto,
-  isRecording,
-  onToggleRecording,
-  droneConnected,
   onTakeoff,
   onLand,
   onEmergency,
+  onCapturePhoto,
+  onToggleRecording,
   onToggleVideoStream
 }) => {
+  const dispatch = useDispatch();
+  const { isConnected, streamEnabled, isRecording } = useSelector(state => state.drone);
   const pulseAnim = useRef(new Animated.Value(0)).current;
   const emergencyPulseAnim = useRef(new Animated.Value(0)).current;
   const videoPulseAnim = useRef(new Animated.Value(0)).current;
+
+  const handleConnect = () => {
+    dispatch(setConnectionStatus(!isConnected));
+  };
+
+  const handleStream = () => {
+    dispatch(setStreamEnabled(!streamEnabled));
+  };
+
+  // Add new handlers for photo and video capture
+  const handlePhotoCapture = async () => {
+    try {
+      // First call the original onCapturePhoto handler
+      const photoData = await onCapturePhoto();
+      
+      if (photoData) {
+        // Save the photo using our storage utility
+        const savedPath = await savePhoto(photoData, 'drone_capture');
+        console.log('Photo saved successfully at:', savedPath);
+      }
+    } catch (error) {
+      console.error('Failed to capture and save photo:', error);
+    }
+  };
+
+  // Track recording state and file path
+  const recordingRef = useRef({
+    videoData: null,
+    startTime: null
+  });
+
+  const handleRecordingToggle = async () => {
+    try {
+      if (!isRecording) {
+        // Starting recording
+        recordingRef.current.startTime = Date.now();
+        await onToggleRecording(true);
+      } else {
+        // Stopping recording
+        const videoData = await onToggleRecording(false);
+        if (videoData) {
+          const fileName = `drone_recording_${recordingRef.current.startTime}`;
+          const savedPath = await saveVideo(videoData, fileName);
+          console.log('Video saved successfully at:', savedPath);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to handle recording:', error);
+    }
+  };
 
   useEffect(() => {
     // Connect button pulse animation
@@ -93,14 +143,14 @@ const DroneControl = ({
         {/* Takeoff button */}
         <Pressable
           onPress={onTakeoff}
-          disabled={!droneConnected}
+          disabled={!isConnected}
           style={({ pressed }) => ({
             padding: 10,
             backgroundColor: 'transparent',
             borderRadius: 8,
             borderWidth: 1,
-            borderColor: droneConnected ? 'rgba(16, 185, 129, 0.5)' : 'rgba(107, 114, 128, 0.3)',
-            opacity: droneConnected ? (pressed ? 0.7 : 1) : 0.5,
+            borderColor: isConnected ? 'rgba(16, 185, 129, 0.5)' : 'rgba(107, 114, 128, 0.3)',
+            opacity: isConnected ? (pressed ? 0.7 : 1) : 0.5,
             transform: [{ scale: pressed ? 1.05 : 1 }],
           })}
         >
@@ -108,7 +158,7 @@ const DroneControl = ({
             width={20}
             height={20}
             viewBox="0 0 24 24"
-            stroke={droneConnected ? "rgb(52, 211, 153)" : "rgb(156, 163, 175)"}
+            stroke={isConnected ? "rgb(52, 211, 153)" : "rgb(156, 163, 175)"}
             fill="none"
           >
             <Path
@@ -123,14 +173,14 @@ const DroneControl = ({
         {/* Land button */}
         <Pressable
           onPress={onLand}
-          disabled={!droneConnected}
+          disabled={!isConnected}
           style={({ pressed }) => ({
             padding: 10,
             backgroundColor: 'transparent',
             borderRadius: 8,
             borderWidth: 1,
-            borderColor: droneConnected ? 'rgba(14, 165, 233, 0.5)' : 'rgba(107, 114, 128, 0.3)',
-            opacity: droneConnected ? (pressed ? 0.7 : 1) : 0.5,
+            borderColor: isConnected ? 'rgba(14, 165, 233, 0.5)' : 'rgba(107, 114, 128, 0.3)',
+            opacity: isConnected ? (pressed ? 0.7 : 1) : 0.5,
             transform: [{ scale: pressed ? 1.05 : 1 }],
           })}
         >
@@ -138,7 +188,7 @@ const DroneControl = ({
             width={20}
             height={20}
             viewBox="0 0 24 24"
-            stroke={droneConnected ? "rgb(56, 189, 248)" : "rgb(156, 163, 175)"}
+            stroke={isConnected ? "rgb(56, 189, 248)" : "rgb(156, 163, 175)"}
             fill="none"
           >
             <Path
@@ -153,25 +203,25 @@ const DroneControl = ({
         {/* Emergency button */}
         <Pressable
           onPress={onEmergency}
-          disabled={!droneConnected}
+          disabled={!isConnected}
           style={({ pressed }) => ({
             padding: 10,
             backgroundColor: 'transparent',
             borderRadius: 8,
             borderWidth: 1,
-            borderColor: droneConnected ? 'rgba(239, 68, 68, 0.5)' : 'rgba(107, 114, 128, 0.3)',
-            opacity: droneConnected ? (pressed ? 0.7 : 1) : 0.5,
+            borderColor: isConnected ? 'rgba(239, 68, 68, 0.5)' : 'rgba(107, 114, 128, 0.3)',
+            opacity: isConnected ? (pressed ? 0.7 : 1) : 0.5,
             transform: [{ scale: pressed ? 1.05 : 1 }],
           })}
         >
           <Animated.View style={{
-            opacity: droneConnected ? emergencyPulseAnim : 1,
+            opacity: isConnected ? emergencyPulseAnim : 1,
           }}>
             <Svg
               width={20}
               height={20}
               viewBox="0 0 24 24"
-              stroke={droneConnected ? "rgb(248, 113, 113)" : "rgb(156, 163, 175)"}
+              stroke={isConnected ? "rgb(248, 113, 113)" : "rgb(156, 163, 175)"}
               fill="none"
             >
               <Path
@@ -201,7 +251,7 @@ const DroneControl = ({
         }}>
           {/* Connect button */}
           <Pressable
-            onPress={onConnect}
+            onPress={handleConnect}
             style={({ pressed }) => ({
               paddingVertical: 2,
               paddingHorizontal: 5,
@@ -220,7 +270,7 @@ const DroneControl = ({
                   width: 8,
                   height: 8,
                   borderRadius: 4,
-                  backgroundColor: '#ff0000',
+                  backgroundColor: isConnected ? '#10b981' : '#ff0000',
                   transform: [{ scale }],
                   opacity,
                 }}
@@ -230,7 +280,7 @@ const DroneControl = ({
                   width: 4,
                   height: 4,
                   borderRadius: 2,
-                  backgroundColor: '#ff0000',
+                  backgroundColor: isConnected ? '#10b981' : '#ff0000',
                 }}
               />
             </View>
@@ -258,18 +308,32 @@ const DroneControl = ({
           </Pressable>
 
           {/* Video Stream Button */}
-          {droneConnected || (
+          {isConnected && (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Animated.View style={{
-                width: 8,
-                height: 8,
-                borderRadius: 4,
-                backgroundColor: streamEnabled ? '#0ea5e9' : '#ef4444',
-                opacity: videoPulseAnim,
-              }} />
+              <View style={{ width: 12, height: 12, justifyContent: 'center', alignItems: 'center' }}>
+                <Animated.View
+                  style={{
+                    position: 'absolute',
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: streamEnabled ? '#0ea5e9' : '#ef4444',
+                    transform: [{ scale }],
+                    opacity: videoPulseAnim,
+                  }}
+                />
+                <View
+                  style={{
+                    width: 4,
+                    height: 4,
+                    borderRadius: 2,
+                    backgroundColor: streamEnabled ? '#0ea5e9' : '#ef4444',
+                  }}
+                />
+              </View>
               
               <Pressable
-                onPress={onToggleVideoStream}
+                onPress={handleStream}
                 style={({ pressed }) => ({
                   paddingVertical: 2,
                   paddingHorizontal: 5,
@@ -324,7 +388,7 @@ const DroneControl = ({
           gap: 12,
         }}>
           <Pressable
-            onPress={onCapturePhoto}
+            onPress={handlePhotoCapture}
             disabled={!streamEnabled}
             style={({ pressed }) => ({
               paddingVertical: 2,
@@ -369,7 +433,7 @@ const DroneControl = ({
           </Pressable>
 
           <Pressable
-            onPress={onToggleRecording}
+            onPress={handleRecordingToggle}
             disabled={!streamEnabled}
             style={({ pressed }) => ({
               paddingVertical: 2,

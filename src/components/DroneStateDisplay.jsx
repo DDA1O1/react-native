@@ -1,8 +1,11 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import { useSelector } from 'react-redux';
 
-const DroneStateDisplay = ({ battery, flightTime, lastUpdate }) => {
+const DroneStateDisplay = () => {
+  const { battery, flightTime, lastUpdate } = useSelector(state => state.drone);
+
   const getBatteryColor = () => {
     if (!battery) return 'rgb(107, 114, 128)'; // gray-500
     if (battery < 20) return 'rgba(248, 113, 113, 0.9)'; // red-400/90

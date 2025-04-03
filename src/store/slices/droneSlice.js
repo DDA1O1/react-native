@@ -2,10 +2,13 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   isConnected: false,
+  isStreaming: false,
   battery: 0,
   flightTime: 0,
   lastUpdate: new Date().toISOString(),
   error: null,
+  streamEnabled: false,
+  isRecording: false,
 };
 
 export const droneSlice = createSlice({
@@ -24,9 +27,21 @@ export const droneSlice = createSlice({
     setError: (state, action) => {
       state.error = action.payload;
     },
+    setStreamEnabled: (state, action) => {
+      state.streamEnabled = action.payload;
+    },
+    setRecording: (state, action) => {
+      state.isRecording = action.payload;
+    },
   },
 });
 
-export const { setConnectionStatus, updateDroneState, setError } = droneSlice.actions;
+export const { 
+  setConnectionStatus, 
+  updateDroneState, 
+  setError,
+  setStreamEnabled,
+  setRecording
+} = droneSlice.actions;
 
 export default droneSlice.reducer; 
