@@ -81,20 +81,55 @@ const VirtualJoystick = ({ onLeftJoystickMove, onRightJoystickMove }) => {
     }
   };
 
-  const renderArrow = (direction, active) => {
+  const renderArrow = (direction, active, isRotation = false) => {
     let path = '';
+    if (isRotation && (direction === 'left' || direction === 'right')) {
+      // Rotation arrows (anti-clockwise for left, clockwise for right)
+      switch (direction) {
+        case 'left':
+          path = 'M19 8C17.1085 6.21141 14.6691 5 12 5C7.02944 5 3 9.02944 3 14M3 14L6 11M3 14L0 11';
+          return (
+            <Svg
+              width={24}
+              height={24}
+              viewBox="0 0 24 24"
+              stroke={active ? "white" : "rgba(156, 163, 175, 0.5)"}
+              fill="none"
+              strokeWidth={2}
+            >
+              <Path d={path} strokeLinecap="round" strokeLinejoin="round" />
+            </Svg>
+          );
+        case 'right':
+          path = 'M5 8C6.89151 6.21141 9.33088 5 12 5C16.9706 5 21 9.02944 21 14M21 14L24 11M21 14L18 11';
+          return (
+            <Svg
+              width={24}
+              height={24}
+              viewBox="0 0 24 24"
+              stroke={active ? "white" : "rgba(156, 163, 175, 0.5)"}
+              fill="none"
+              strokeWidth={2}
+            >
+              <Path d={path} strokeLinecap="round" strokeLinejoin="round" />
+            </Svg>
+          );
+      }
+    }
+
+    // Regular triangular arrows for other directions
     switch (direction) {
       case 'up':
-        path = 'M5 10l7-7m0 0l7 7m-7-7v18';
+        path = 'M12 4L4 14H20L12 4Z';
         break;
       case 'down':
-        path = 'M19 14l-7 7m0 0l-7-7m7 7V3';
+        path = 'M12 20L20 10H4L12 20Z';
         break;
       case 'left':
-        path = 'M10 19l-7-7m0 0l7-7m-7 7h18';
+        path = 'M4 12L14 20V4L4 12Z';
         break;
       case 'right':
-        path = 'M14 5l7 7m0 0l-7 7m7-7H3';
+        path = 'M20 12L10 4V20L20 12Z';
         break;
     }
 
@@ -104,14 +139,9 @@ const VirtualJoystick = ({ onLeftJoystickMove, onRightJoystickMove }) => {
         height={24}
         viewBox="0 0 24 24"
         stroke={active ? "white" : "rgba(156, 163, 175, 0.5)"}
-        fill="none"
+        fill={active ? "white" : "rgba(156, 163, 175, 0.5)"}
       >
-        <Path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d={path}
-        />
+        <Path d={path} />
       </Svg>
     );
   };
@@ -130,10 +160,10 @@ const VirtualJoystick = ({ onLeftJoystickMove, onRightJoystickMove }) => {
               {renderArrow('down', isArrowActive(leftPosition, 'down'))}
             </View>
             <View style={[styles.arrow, styles.leftArrow]}>
-              {renderArrow('left', isArrowActive(leftPosition, 'left'))}
+              {renderArrow('left', isArrowActive(leftPosition, 'left'), true)}
             </View>
             <View style={[styles.arrow, styles.rightArrow]}>
-              {renderArrow('right', isArrowActive(leftPosition, 'right'))}
+              {renderArrow('right', isArrowActive(leftPosition, 'right'), true)}
             </View>
           </View>
 
@@ -149,9 +179,6 @@ const VirtualJoystick = ({ onLeftJoystickMove, onRightJoystickMove }) => {
               },
             ]}
           >
-            <View style={styles.knobLabel}>
-              <Animated.Text style={styles.knobText}>ALT</Animated.Text>
-            </View>
           </Animated.View>
         </View>
       </GestureDetector>
@@ -187,9 +214,6 @@ const VirtualJoystick = ({ onLeftJoystickMove, onRightJoystickMove }) => {
               },
             ]}
           >
-            <View style={styles.knobLabel}>
-              <Animated.Text style={styles.knobText}>MOVE</Animated.Text>
-            </View>
           </Animated.View>
         </View>
       </GestureDetector>
@@ -254,10 +278,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderWidth: 2,
     borderColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  knobLabel: {
     justifyContent: 'center',
     alignItems: 'center',
   },
