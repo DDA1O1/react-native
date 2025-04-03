@@ -257,6 +257,7 @@ const DroneControl = ({
             </Text>
           </Pressable>
 
+          {/* Video Stream Button */}
           {droneConnected || (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Animated.View style={{

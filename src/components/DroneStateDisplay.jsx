@@ -15,7 +15,7 @@ const DroneStateDisplay = ({ battery, flightTime, lastUpdate }) => {
       backgroundColor: 'transparent',
       borderRadius: 8,
       padding: 8,
-      backgroundColor: bgColor,
+      backgroundColor: 'transparent',
     }}>
       <View style={{
         flexDirection: 'row',
@@ -32,7 +32,7 @@ const DroneStateDisplay = ({ battery, flightTime, lastUpdate }) => {
           {icon}
         </Svg>
         <View style={{
-          backgroundColor: 'rgba(0, 0, 0, 0.2)',
+          backgroundColor: 'transparent',
           borderRadius: 6,
           paddingHorizontal: 8,
           paddingVertical: 4,
@@ -57,9 +57,8 @@ const DroneStateDisplay = ({ battery, flightTime, lastUpdate }) => {
       {/* Battery Display */}
       <View style={{
         position: 'absolute',
-        top: 22,
-        left: '50%',
-        transform: [{ translateX: -50 }],
+        top: 15,
+        left: 190,
         zIndex: 30,
       }}>
         <StatusBox
@@ -80,7 +79,7 @@ const DroneStateDisplay = ({ battery, flightTime, lastUpdate }) => {
       {/* Flight Time Display */}
       <View style={{
         position: 'absolute',
-        top: 80,
+        top: 50,
         right: 40,
         zIndex: 30,
       }}>
@@ -102,7 +101,7 @@ const DroneStateDisplay = ({ battery, flightTime, lastUpdate }) => {
       {/* Last Update Display */}
       <View style={{
         position: 'absolute',
-        top: 130,
+        top: 80,
         right: 40,
         zIndex: 30,
       }}>

@@ -12,7 +12,7 @@ const VideoFeed = () => {
                 videoAspectRatio="16:9"
                 autoplay={true}
                 paused={!isPlaying}
-                source={{ uri: 'udp://0.0.0.0:11111' }}
+                //source={{ uri: 'udp://0.0.0.0:11111' }}
                 onError={(e) => console.log('Error:', e)}
                 onProgress={(e) => console.log('Progress:', e)}
                 resizeMode="cover"
