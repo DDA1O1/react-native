@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { SafeAreaView, StatusBar, View, StyleSheet } from 'react-native';
 import VideoFeed from './components/VideoFeed';
 import DroneControl from './components/DroneControl';
-
+import DroneStateDisplay from './components/DroneStateDisplay';
 const App = () => {
   const [isConnected, setIsConnected] = useState(false);
+  const [battery, setBattery] = useState(0);
+  const [flightTime, setFlightTime] = useState(0);
+  const [lastUpdate, setLastUpdate] = useState(new Date());
 
   const handleConnect = () => {
     // TODO: Implement drone connection logic
@@ -19,6 +22,11 @@ const App = () => {
         <DroneControl 
           isConnected={isConnected} 
           onConnect={handleConnect} 
+        />
+        <DroneStateDisplay 
+          battery={battery} 
+          flightTime={flightTime} 
+          lastUpdate={lastUpdate} 
         />
       </View>
     </SafeAreaView>

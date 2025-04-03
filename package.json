@@ -12,10 +12,8 @@
   "dependencies": {
     "react": "19.0.0",
     "react-native": "0.78.2",
-    "react-native-immersive-mode": "^2.0.2",
     "react-native-svg": "^15.11.2",
-    "react-native-vlc-media-player": "^1.0.81",
-    "tailwindcss": "^3.4.17"
+    "react-native-vlc-media-player": "^1.0.81"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
