@@ -1,5 +1,8 @@
 import RNFS from 'react-native-fs';
 
+// Log the actual path
+console.log('Document Directory Path:', RNFS.DocumentDirectoryPath);
+
 // Constants for media directories
 const MEDIA_DIR = {
   BASE: `${RNFS.DocumentDirectoryPath}/drone_media`,

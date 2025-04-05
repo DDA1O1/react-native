@@ -3,12 +3,14 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   isConnected: false,
   isStreaming: false,
-  battery: 0,
-  flightTime: 0,
-  lastUpdate: new Date().toISOString(),
   error: null,
   streamEnabled: false,
   isRecording: false,
+  droneState: {
+    battery: null,
+    flightTime: null,
+    lastUpdate: null
+  }
 };
 
 export const droneSlice = createSlice({
@@ -20,9 +22,9 @@ export const droneSlice = createSlice({
     },
     updateDroneState: (state, action) => {
       const { battery, flightTime } = action.payload;
-      state.battery = battery;
-      state.flightTime = flightTime;
-      state.lastUpdate = new Date().toISOString();
+      state.droneState.battery = battery;
+      state.droneState.flightTime = flightTime;
+      state.droneState.lastUpdate = new Date().toISOString();
     },
     setError: (state, action) => {
       state.error = action.payload;
