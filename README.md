@@ -1,97 +1,179 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# React Native Navigation Modules
 
-# Getting Started
+## Core Navigation Components
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+### NavigationContainer
+The root component that manages the navigation state and links your top-level navigator to the app environment.
 
-## Step 1: Start Metro
+**Key Features:**
+- Acts as a context provider for navigation
+- Manages navigation state
+- Handles deep linking integration
+- Manages system back button on Android
+- Provides screen tracking capabilities
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+### createNativeStackNavigator
+Creates a native stack navigator that provides screen transitions using native platform APIs.
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+**Key Features:**
+- Uses native navigation APIs (UINavigationController on iOS, Fragment on Android)
+- Manages screen transitions with platform-specific animations
+- Provides stack-based navigation (push/pop screens)
+- Handles screen configuration and options
 
-```sh
-# Using npm
-npm start
+## How They Work Together
 
-# OR using Yarn
-yarn start
+```javascript
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+const Stack = createNativeStackNavigator();
+
+function App() {
+  return (
+    <NavigationContainer>      {/* Root container */}
+      <Stack.Navigator>        {/* Stack navigator */}
+        <Stack.Screen 
+          name="Home" 
+          component={HomeScreen} 
+        />
+        <Stack.Screen 
+          name="Profile" 
+          component={ProfileScreen} 
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
 ```
 
-## Step 2: Build and run your app
+## Why Two Different Modules?
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+1. **NavigationContainer**
+   - Single instance per app
+   - Manages global navigation state
+   - Required as the root wrapper
+   - Handles app-level navigation features
 
-### Android
+2. **createNativeStackNavigator**
+   - Can have multiple instances
+   - Handles specific navigation patterns
+   - Manages screen transitions
+   - Configures individual screen options
 
-```sh
-# Using npm
-npm run android
+Think of NavigationContainer as the "navigation manager" and createNativeStackNavigator as the "navigation implementation" - you need both for a complete navigation system.
 
-# OR using Yarn
-yarn android
+## Best Practices
+
+1. Always wrap your app's navigation with NavigationContainer
+2. Use createNativeStackNavigator for screen-to-screen navigation
+3. Configure screen options at the Stack.Screen level
+4. Handle navigation logic using the navigation prop provided to screens
+
+## Additional Navigation Types
+
+React Navigation also supports other navigation patterns:
+- Tab Navigation
+- Drawer Navigation
+- Bottom Sheet Navigation
+- Modal Navigation
+
+Choose the appropriate navigator based on your app's navigation requirements.
+
+## React Native Gesture Handler
+
+### Overview
+React Native Gesture Handler provides native-driven gesture management APIs for handling touch and gesture interactions in React Native applications. It replaces React Native's built-in touch system with more performant native implementations.
+
+### Key Features
+- Native performance through direct gesture handling on native threads
+- Support for complex gestures (pan, pinch, rotation, etc.)
+- Integration with native animation libraries
+- Cross-platform consistency (iOS & Android)
+- Support for multiple simultaneous gestures
+- 120 FPS animations capability
+
+### Basic Setup
+```javascript
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+function App() {
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      {/* Your app content */}
+    </GestureHandlerRootView>
+  );
+}
 ```
+### Available Gesture Handlers
+- Pan Gesture
+- Tap Gesture
+- Long Press Gesture
+- Rotation Gesture
+- Pinch Gesture
+- Fling Gesture
+- Native Button Components
+- Swipeable Components
+- Drawer Layouts
 
-### iOS
+### Best Practices
+1. Always wrap your app with GestureHandlerRootView
+2. Use appropriate gesture handlers based on interaction needs
+3. Combine with React Native Reanimated for smooth animations
+4. Consider gesture handler interactions when nesting touchable components
+5. Implement proper gesture feedback for better UX
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+### Integration Benefits
+- Improved touch response time
+- More reliable gesture recognition
+- Better performance for gesture-based animations
+- Native feedback and behavior
+- Support for complex gesture combinations
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
 
-```sh
-bundle install
-```
+    1. handlePhotoCapture() in DroneControl.jsx is called
+     2. Checks if drone is connected and streaming
+     3. Calls onCapturePhoto() (handleCapturePhoto in App.jsx)
+     4. handleCapturePhoto calls droneConnection.capturePhoto()
+     5. If successful, saves the photo using savePhoto()
 
-Then, and every time you update your native dependencies, run:
+   Recording Start:
+   1. User presses "Record" button
+   2. handleRecordingToggle(true) is called
+   3. droneConnection.startRecording() is invoked
+   4. Creates a UDP socket for video data
+   5. Starts accumulating video data in a buffer
+   6. Updates Redux state (isRecording = true)
 
-```sh
-bundle exec pod install
-```
+   Recording Stop:
+   1. User presses "Stop" button
+   2. handleRecordingToggle(false) is called
+   3. droneConnection.stopRecording() is invoked
+   4. Converts accumulated buffer to base64
+   5. Cleans up resources
+   6. Updates Redux state (isRecording = false)
+   7. Returns video data for saving
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+For more detailed information, visit the [official documentation](https://docs.swmansion.com/react-native-gesture-handler/docs/).
 
-```sh
-# Using npm
-npm run ios
+## JavaScript (.js) vs JSX (.jsx) Files
 
-# OR using Yarn
-yarn ios
-```
+### Overview
+In this project, we use `.js` extension for our React Native files. While both `.js` and `.jsx` extensions work for files containing JSX syntax, here's why we chose `.js`:
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+1. **React Native Convention**: React Native projects traditionally use `.js` extensions, making it a common community practice.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+2. **Build System Compatibility**: Our build system (Metro bundler) treats `.js` and `.jsx` files identically, transpiling JSX syntax regardless of the extension.
 
-## Step 3: Modify your app
+3. **Simplicity**: Using `.js` maintains consistency with other JavaScript files in the project that might not contain JSX.
 
-Now that you have successfully run the app, let's make changes!
+4. **IDE Support**: Modern IDEs and editors provide full JSX support for `.js` files in React Native projects.
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+### Key Points
+- Both `.js` and `.jsx` extensions support JSX syntax
+- The functionality remains identical regardless of the extension
+- Babel configuration handles JSX transformation for both extensions
+- File extension choice is primarily a matter of team convention
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+For more information about React Native development practices, visit the [official React Native documentation](https://reactnative.dev/docs).
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.

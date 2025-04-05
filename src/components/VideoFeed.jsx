@@ -3,7 +3,6 @@ import { View, StyleSheet } from 'react-native';
 import { VLCPlayer } from 'react-native-vlc-media-player';
 
 const VideoFeed = () => {
-    const [isPlaying, setIsPlaying] = useState(false);
 
     return (
         <View style={styles.container}>
@@ -11,8 +10,7 @@ const VideoFeed = () => {
                 style={styles.player}
                 videoAspectRatio="16:9"
                 autoplay={true}
-                paused={!isPlaying}
-                //source={{ uri: 'udp://0.0.0.0:11111' }}
+                source={{ uri: 'udp://0.0.0.0:11111' }}
                 onError={(e) => console.log('Error:', e)}
                 onProgress={(e) => console.log('Progress:', e)}
                 resizeMode="cover"

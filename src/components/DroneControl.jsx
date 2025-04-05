@@ -4,6 +4,7 @@ import Svg, { Path } from 'react-native-svg';
 import { useDispatch, useSelector } from 'react-redux';
 import { setConnectionStatus, setStreamEnabled } from '@store/slices/droneSlice';
 import { savePhoto, saveVideo } from '../utils/storage';
+import droneConnection from '../services/droneConnection';
 
 const DroneControl = ({ 
   onTakeoff,
@@ -19,22 +20,84 @@ const DroneControl = ({
   const emergencyPulseAnim = useRef(new Animated.Value(0)).current;
   const videoPulseAnim = useRef(new Animated.Value(0)).current;
 
-  const handleConnect = () => {
-    dispatch(setConnectionStatus(!isConnected));
+  const handleConnect = async () => {
+    try {
+      if (!isConnected) {
+        await droneConnection.connect();
+      } else {
+        droneConnection.disconnect();
+      }
+    } catch (error) {
+      console.error('Failed to connect to drone:', error);
+      dispatch(setConnectionStatus(false));
+    }
   };
 
-  const handleStream = () => {
-    dispatch(setStreamEnabled(!streamEnabled));
+  const handleTakeoff = async () => {
+    try {
+      if (!isConnected) {
+        console.error('Drone not connected');
+        return;
+      }
+      await droneConnection.sendCommand('takeoff');
+      onTakeoff();
+    } catch (error) {
+      console.error('Failed to takeoff:', error);
+    }
+  };
+
+  const handleLand = async () => {
+    try {
+      if (!isConnected) {
+        console.error('Drone not connected');
+        return;
+      }
+      await droneConnection.sendCommand('land');
+      onLand();
+    } catch (error) {
+      console.error('Failed to land:', error);
+    }
+  };
+
+  const handleEmergency = async () => {
+    try {
+      if (!isConnected) {
+        console.error('Drone not connected');
+        return;
+      }
+      await droneConnection.sendCommand('emergency');
+      onEmergency();
+    } catch (error) {
+      console.error('Failed to execute emergency command:', error);
+    }
+  };
+
+  const handleStream = async () => {
+    try {
+      if (!streamEnabled) {
+        await droneConnection.videoStream();
+        onToggleVideoStream(true);
+      } else {
+        await droneConnection.stopVideoStream();
+        onToggleVideoStream(false);
+      }
+    } catch (error) {
+      console.error('Failed to toggle video stream:', error);
+      dispatch(setStreamEnabled(false));
+      onToggleVideoStream(false);
+    }
   };
 
   // Add new handlers for photo and video capture
   const handlePhotoCapture = async () => {
     try {
-      // First call the original onCapturePhoto handler
+      if (!isConnected || !streamEnabled) {
+        console.error('Drone not connected or stream not enabled');
+        return;
+      }
       const photoData = await onCapturePhoto();
       
       if (photoData) {
-        // Save the photo using our storage utility
         const savedPath = await savePhoto(photoData, 'drone_capture');
         console.log('Photo saved successfully at:', savedPath);
       }
@@ -51,12 +114,15 @@ const DroneControl = ({
 
   const handleRecordingToggle = async () => {
     try {
+      if (!isConnected || !streamEnabled) {
+        console.error('Drone not connected or stream not enabled');
+        return;
+      }
+
       if (!isRecording) {
-        // Starting recording
         recordingRef.current.startTime = Date.now();
         await onToggleRecording(true);
       } else {
-        // Stopping recording
         const videoData = await onToggleRecording(false);
         if (videoData) {
           const fileName = `drone_recording_${recordingRef.current.startTime}`;
@@ -142,7 +208,7 @@ const DroneControl = ({
       }}>
         {/* Takeoff button */}
         <Pressable
-          onPress={onTakeoff}
+          onPress={handleTakeoff}
           disabled={!isConnected}
           style={({ pressed }) => ({
             padding: 10,
@@ -172,7 +238,7 @@ const DroneControl = ({
 
         {/* Land button */}
         <Pressable
-          onPress={onLand}
+          onPress={handleLand}
           disabled={!isConnected}
           style={({ pressed }) => ({
             padding: 10,
@@ -202,7 +268,7 @@ const DroneControl = ({
 
         {/* Emergency button */}
         <Pressable
-          onPress={onEmergency}
+          onPress={handleEmergency}
           disabled={!isConnected}
           style={({ pressed }) => ({
             padding: 10,
